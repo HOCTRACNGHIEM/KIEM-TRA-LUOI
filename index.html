@@ -23,27 +23,13 @@
         #settingsModal:not(.hidden) { opacity: 1; pointer-events: auto; }
     </style>
 </head>
-<script>
-  // Chặn chuột phải
-  document.addEventListener('contextmenu', event => event.preventDefault());
-
-  // Chặn F12 và các tổ hợp phím kiểm tra code
-  document.onkeydown = function(e) {
-    if (e.keyCode == 123) return false; // F12
-    if (e.ctrlKey && e.shiftKey && e.keyCode == 'I'.charCodeAt(0)) return false; // Ctrl+Shift+I
-    if (e.ctrlKey && e.shiftKey && e.keyCode == 'C'.charCodeAt(0)) return false; // Ctrl+Shift+C
-    if (e.ctrlKey && e.shiftKey && e.keyCode == 'J'.charCodeAt(0)) return false; // Ctrl+Shift+J
-    if (e.ctrlKey && e.keyCode == 'U'.charCodeAt(0)) return false; // Ctrl+U
-  }
-</script>
 <body class="bg-slate-100 text-slate-800 font-sans antialiased h-screen flex flex-col">
 
     <!-- Header -->
     <header class="bg-[#1e40af] text-white p-4 shadow-md flex justify-between items-center z-10 shrink-0 relative">
         <div>
             <h1 class="text-xl font-bold uppercase tracking-wide">Kiểm Tra Lưới Điện</h1>
-            <p class="text-xs opacity-80" id="headerSubtitle">Hoạt động Offline (Giao diện động)</p>
-	    <p class="text-xs opacity-80" id="headerSubtitle">Cty Điện lực Bình Phú - PKT</p>
+            <p class="text-xs opacity-80" id="headerSubtitle">Hoạt động Offline (PC Binh Phu - PKT)</p>
         </div>
         <div class="flex items-center gap-3 z-10">
             <button onclick="toggleSettings()" class="p-2 bg-blue-800 hover:bg-blue-700 rounded-full transition-colors">
@@ -51,17 +37,14 @@
             </button>
         </div>
         <div class="absolute right-16 top-1/2 transform -translate-y-1/2 opacity-10 pointer-events-none">
-            <i data-lucide="zap" class="w-10 h-10"></i>
+            <i data-lucide="shield-check" class="w-10 h-10"></i>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="flex-1 overflow-hidden flex flex-col w-full max-w-md mx-auto relative">
-        
         <!-- Form Nhập liệu -->
         <div id="formTab" class="p-4 overflow-y-auto custom-scrollbar flex-1 bg-slate-100 space-y-4">
-            
-            <!-- Nhóm Thông tin Vị trí -->
             <div class="bg-white rounded-lg shadow-sm border border-slate-200">
                 <div class="bg-blue-50 p-3 rounded-t-lg flex items-center font-bold text-blue-700 border-b border-blue-100">
                     <i data-lucide="map-pin" class="w-5 h-5 mr-2"></i> THÔNG TIN VỊ TRÍ
@@ -69,12 +52,13 @@
                 <div class="p-4 space-y-3">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">TUYẾN DÂY *</label>
-                        <!-- Danh sách này sẽ được sinh tự động từ hàm renderTuyenDropdown() -->
-                        <select id="tuyen" required class="w-full border border-slate-300 rounded p-2 focus:ring-1 focus:ring-blue-500 outline-none text-sm bg-white"></select>
+                        <select id="tuyen" required class="w-full border border-slate-300 rounded p-2 focus:ring-1 focus:ring-blue-500 outline-none text-sm bg-white">
+                            <option value="">-- Chọn tuyến dây --</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">NHÁNH RẼ</label>
-                        <input type="text" id="nhanhre" class="w-full border border-slate-300 rounded p-2 focus:ring-1 focus:ring-blue-500 outline-none text-sm" placeholder="VD: Nhánh hẻm 1...">
+                        <input type="text" id="nhanhre" class="w-full border border-slate-300 rounded p-2 focus:ring-1 focus:ring-blue-500 outline-none text-sm" placeholder="VD: Nhánh hẻm 1, nhánh công ty A...">
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
@@ -88,9 +72,8 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">SỐ TRỤ *</label>
-                        <input type="text" id="vitri" required class="w-full border border-slate-300 rounded p-2 focus:ring-1 focus:ring-blue-500 outline-none text-sm font-bold text-blue-700" placeholder="VD: 45A...">
+                        <input type="text" id="vitri" required class="w-full border border-slate-300 rounded p-2 focus:ring-1 focus:ring-blue-500 outline-none text-sm" placeholder="Trụ...">
                     </div>
-                    
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">MỨC ĐỘ ƯU TIÊN</label>
                         <div class="grid grid-cols-3 gap-2 mb-2">
@@ -99,12 +82,17 @@
                             <div class="relative"><input type="radio" name="uutien" id="ut3" value="Khẩn cấp" class="priority-radio hidden"><label for="ut3" class="block w-full text-center text-sm font-medium border border-red-500 text-red-600 rounded py-1.5 cursor-pointer transition-colors">Khẩn cấp</label></div>
                         </div>
                     </div>
-
                     <div>
-                        <label class="block text-sm font-medium text-slate-700 mb-1">HÌNH ẢNH</label>
+                        <label class="block text-sm font-medium text-slate-700 mb-1">HÌNH ẢNH (Chụp hoặc chọn từ thư viện)</label>
                         <div class="flex gap-2 mb-2">
-                            <label class="flex-1 flex flex-col items-center justify-center py-2 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100"><i data-lucide="camera" class="w-5 h-5 text-blue-500 mb-1"></i><span class="text-[10px] text-blue-600 font-bold uppercase">Chụp ảnh</span><input type="file" accept="image/*" capture="environment" class="hidden" onchange="previewAndCompressMultipleImages(event)" /></label>
-                            <label class="flex-1 flex flex-col items-center justify-center py-2 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100"><i data-lucide="images" class="w-5 h-5 text-blue-500 mb-1"></i><span class="text-[10px] text-blue-600 font-bold uppercase">Thư viện</span><input type="file" accept="image/*" multiple class="hidden" onchange="previewAndCompressMultipleImages(event)" /></label>
+                            <label class="flex-1 flex flex-col items-center justify-center py-2.5 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors">
+                                <i data-lucide="camera" class="w-5 h-5 text-blue-500 mb-1"></i><span class="text-[10px] text-blue-600 font-bold uppercase">Chụp ảnh</span>
+                                <input type="file" accept="image/*" capture="environment" class="hidden" onchange="previewAndCompressMultipleImages(event)" />
+                            </label>
+                            <label class="flex-1 flex flex-col items-center justify-center py-2.5 border-2 border-blue-300 border-dashed rounded-lg cursor-pointer bg-blue-50 hover:bg-blue-100 transition-colors">
+                                <i data-lucide="images" class="w-5 h-5 text-blue-500 mb-1"></i><span class="text-[10px] text-blue-600 font-bold uppercase">Thư viện</span>
+                                <input type="file" accept="image/*" multiple class="hidden" onchange="previewAndCompressMultipleImages(event)" />
+                            </label>
                         </div>
                         <div class="flex gap-2 items-center overflow-x-auto custom-scrollbar pb-2 min-h-[5rem]" id="imageGallery"></div>
                         <canvas id="compressCanvas" style="display:none;"></canvas>
@@ -112,41 +100,46 @@
                 </div>
             </div>
 
-            <!-- Khu vực Đánh dấu Khiếm khuyết -->
+            <!-- CONTAINER ĐỘNG -->
             <div>
                 <div class="flex justify-between items-center mb-2">
                     <h2 class="font-bold text-slate-700 uppercase" id="checklistTitle">ĐÁNH DẤU KHIẾM KHUYẾT</h2>
-                    <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">LỖI: <span id="selectedErrorCount">0</span></span>
+                    <span class="text-xs bg-slate-200 text-slate-600 px-2 py-1 rounded-full font-medium">ĐÃ CHỌN: <span id="selectedErrorCount">0</span> LỖI</span>
                 </div>
                 <div class="space-y-3" id="dynamicChecklistContainer"></div>
             </div>
 
-            <!-- Ghi chú & Đề nghị -->
             <div class="bg-white rounded-lg shadow-sm border border-slate-200 p-4 space-y-4">
-                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-2">BIỆN PHÁP ĐỀ NGHỊ</label><textarea id="denghi" rows="2" class="w-full border border-slate-300 rounded p-2 focus:ring-1 focus:ring-blue-500 outline-none text-sm"></textarea></div>
-                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-2">GHI CHÚ THÊM</label><textarea id="ghichu" rows="2" class="w-full border border-slate-300 rounded p-2 focus:ring-1 focus:ring-blue-500 outline-none text-sm"></textarea></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-2">BIỆN PHÁP ĐỀ NGHỊ</label><textarea id="denghi" rows="2" class="w-full border border-slate-300 rounded p-2.5 focus:ring-1 focus:ring-blue-500 outline-none text-sm" placeholder="Nhập nội dung đề nghị xử lý..."></textarea></div>
+                <div><label class="block text-xs font-bold text-slate-500 uppercase mb-2">GHI CHÚ THÊM</label><textarea id="ghichu" rows="2" class="w-full border border-slate-300 rounded p-2.5 focus:ring-1 focus:ring-blue-500 outline-none text-sm" placeholder="Nhập các ghi chú khác (nếu có)..."></textarea></div>
             </div>
             
              <div class="pb-4 sticky bottom-0 bg-slate-100 pt-2 z-20 flex gap-2">
                  <button id="btnCancelEdit" type="button" onclick="cancelEdit()" class="hidden w-1/3 bg-slate-300 hover:bg-slate-400 text-slate-800 font-bold py-3.5 rounded-lg shadow transition-transform transform active:scale-95 flex items-center justify-center uppercase tracking-wide">HỦY</button>
-                 <button id="btnSave" onclick="saveRecord()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg shadow transition-transform transform active:scale-95 flex items-center justify-center uppercase tracking-wide"><i data-lucide="save" class="w-5 h-5 mr-2"></i> LƯU PHIẾU</button>
+                 <button id="btnSave" onclick="saveRecord()" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-lg shadow transition-transform transform active:scale-95 flex items-center justify-center uppercase tracking-wide">
+                    <i data-lucide="save" class="w-5 h-5 mr-2"></i> LƯU PHIẾU
+                </button>
              </div>
         </div>
 
-        <!-- Danh sách Đã lưu (Lịch Sử) -->
+        <!-- Lịch Sử -->
         <div id="listTab" class="hidden p-4 overflow-y-auto custom-scrollbar flex-1 bg-slate-100 flex flex-col">
             <div class="flex justify-between items-center mb-4 shrink-0">
                 <h2 class="font-bold text-xl text-slate-800">Lịch sử ghi nhận</h2>
-                <button onclick="exportToExcelJS()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded shadow flex items-center"><i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i> Xuất Excel (<span id="tabCount">0</span>)</button>
+                <button onclick="exportToExcelJS()" class="bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded shadow flex items-center">
+                    <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i> Xuất Excel (<span id="tabCount">0</span>)
+                </button>
             </div>
             <div id="recordsList" class="space-y-3 pb-4 flex-1 overflow-y-auto"></div>
-             <div class="shrink-0 py-2 flex justify-center"><button onclick="clearAllData()" class="text-sm text-red-500 hover:text-red-700 font-medium flex items-center"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i> Xóa tất cả lịch sử</button></div>
+             <div class="shrink-0 py-2 flex justify-center">
+                <button onclick="clearAllData()" class="text-sm text-red-500 hover:text-red-700 font-medium flex items-center"><i data-lucide="trash-2" class="w-4 h-4 mr-1"></i> Xóa tất cả lịch sử</button>
+             </div>
         </div>
     </main>
 
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 shrink-0 flex z-30 relative">
-        <button onclick="switchTab('formTab')" id="btnFormTab" class="flex-1 py-3 flex flex-col items-center justify-center text-blue-600 bg-blue-50 border-t-2 border-blue-600"><i data-lucide="edit" class="w-6 h-6 mb-1"></i><span class="text-xs font-medium uppercase">LẬP PHIẾU</span></button>
+        <button onclick="switchTab('formTab')" id="btnFormTab" class="flex-1 py-3 flex flex-col items-center justify-center text-blue-600 bg-blue-50 border-t-2 border-blue-600"><i data-lucide="edit" class="w-6 h-6 mb-1"></i><span class="text-xs font-medium uppercase">LẬP PHIẾU MỚI</span></button>
         <button onclick="switchTab('listTab')" id="btnListTab" class="flex-1 py-3 flex flex-col items-center justify-center text-slate-400 border-t-2 border-transparent hover:text-blue-500"><i data-lucide="list-checks" class="w-6 h-6 mb-1"></i><span class="text-xs font-medium uppercase">LỊCH SỬ (<span id="footerCount">0</span>)</span></button>
     </footer>
 
@@ -154,433 +147,40 @@
     <div id="settingsModal" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col">
             <div class="bg-slate-800 p-4 flex justify-between items-center">
-                <h3 class="text-white font-bold flex items-center"><i data-lucide="blocks" class="w-5 h-5 mr-2"></i> Cấu hình App</h3>
+                <h3 class="text-white font-bold flex items-center"><i data-lucide="shield" class="w-5 h-5 mr-2"></i> Cài đặt Hệ thống</h3>
                 <button onclick="toggleSettings()" class="text-slate-300 hover:text-white"><i data-lucide="x" class="w-6 h-6"></i></button>
             </div>
-            <div class="p-5 space-y-4 text-sm max-h-[70vh] overflow-y-auto custom-scrollbar">
+            <div class="p-5 space-y-4 text-sm h-96 overflow-y-auto custom-scrollbar">
                 
-                <!-- Khu vực 1: Nạp Tuyến Dây -->
-                <div class="border border-slate-200 rounded p-3 bg-slate-50">
-                    <label class="block text-sm font-bold text-slate-700 mb-1">1. Nạp danh sách Tuyến Dây</label>
-                    <p class="text-[11px] text-slate-500 mb-2">Tải file Excel (Bất kỳ) chứa tên tuyến dây ở Cột A (Cột số 1).</p>
-                    <input type="file" accept=".xlsx" onchange="importTuyenConfig(event)" class="text-sm w-full file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:text-xs file:bg-blue-100 file:text-blue-700 cursor-pointer">
+                <h4 class="font-bold text-blue-700 border-b pb-1 uppercase">1. Nạp danh sách Tuyến dây</h4>
+                <p class="text-slate-600 text-xs">Tải file Excel (1 cột duy nhất ở Cột A) chứa danh sách các tuyến dây để App tự động đưa vào danh sách chọn.</p>
+                <div class="border border-dashed border-slate-300 bg-slate-50 rounded p-3 text-center relative hover:bg-slate-100 cursor-pointer">
+                    <input type="file" accept=".xlsx" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="importTuyenExcel(event)">
+                    <i data-lucide="list" class="w-6 h-6 text-slate-500 mx-auto mb-1"></i><p class="font-bold text-slate-700 text-xs">Tải lên Excel Tuyến dây</p>
                 </div>
 
-                <!-- Khu vực 2: Nạp Danh mục lỗi -->
-                <div class="border border-slate-200 rounded p-3 bg-slate-50">
-                    <label class="block text-sm font-bold text-slate-700 mb-1">2. Nạp Danh mục Chuyên đề</label>
-                    <p class="text-[11px] text-slate-500 mb-2">Sử dụng file Excel mẫu để cập nhật danh mục đánh dấu khiếm khuyết.</p>
-                    <div class="border-2 border-dashed border-blue-300 bg-white rounded flex items-center justify-center relative hover:bg-blue-50 transition-colors cursor-pointer py-2 mb-2">
-                        <input type="file" accept=".json, .xlsx" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="importChecklistConfig(event)">
-                        <i data-lucide="upload-cloud" class="w-5 h-5 text-blue-500 mr-2"></i>
-                        <span class="font-bold text-blue-700 text-xs">Tải lên File cấu hình (Excel/JSON)</span>
-                    </div>
-                    <button onclick="downloadSampleExcel()" class="w-full flex items-center justify-center py-1.5 px-3 bg-green-50 border border-green-200 rounded text-green-700 text-xs font-bold hover:bg-green-100 transition-colors">
-                        <i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i> Tải file EXCEL mẫu về máy
-                    </button>
+                <h4 class="font-bold text-orange-700 border-b pb-1 mt-4 uppercase">2. Cấu hình Chuyên đề Kiểm tra</h4>
+                <p class="text-slate-600 text-xs">Tải file cấu hình Excel (.xlsx) để thay đổi danh mục khiếm khuyết linh hoạt.</p>
+                <div class="border border-dashed border-orange-300 bg-orange-50 rounded p-3 text-center relative hover:bg-orange-100 cursor-pointer">
+                    <input type="file" accept=".json, .xlsx" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer" onchange="importChecklistConfig(event)">
+                    <i data-lucide="upload-cloud" class="w-6 h-6 text-orange-500 mx-auto mb-1"></i><p class="font-bold text-orange-700 text-xs">Tải lên File cấu hình (Excel/JSON)</p>
                 </div>
 
-                <button onclick="resetDefaultConfig()" class="w-full flex items-center justify-center py-2 px-4 border border-red-200 text-red-600 rounded font-medium hover:bg-red-50 transition-colors text-xs">
-                    <i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Khôi phục dữ liệu gốc
-                </button>
+                <div class="space-y-2 pt-4">
+                    <button onclick="downloadSampleExcel()" class="w-full flex items-center justify-center py-2 px-4 bg-green-50 border border-green-200 rounded text-green-700 font-bold hover:bg-green-100 text-xs"><i data-lucide="file-spreadsheet" class="w-4 h-4 mr-2"></i> Tải file EXCEL mẫu về máy</button>
+                    <button onclick="resetDefaultConfig()" class="w-full flex items-center justify-center py-2 px-4 border border-red-200 text-red-600 rounded font-medium hover:bg-red-50 text-xs"><i data-lucide="rotate-ccw" class="w-4 h-4 mr-2"></i> Khôi phục danh mục gốc</button>
+                </div>
             </div>
         </div>
     </div>
 
+    <!-- UI Components -->
     <div id="toastMessage" class="fixed bottom-20 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-4 py-3 rounded-lg shadow-lg transition-opacity duration-300 opacity-0 pointer-events-none z-50 text-sm font-medium w-max max-w-[90%] text-center flex items-center"><span>Thông báo</span></div>
     <div id="loadingOverlay" class="loading-overlay"><div class="animate-spin text-blue-600 mb-4"><i data-lucide="loader-2" class="w-12 h-12"></i></div><p class="text-slate-700 font-bold text-lg" id="loadingText">Đang xử lý...</p></div>
 
     <script>
-        lucide.createIcons();
-        const DB_NAME = 'LuoiDienDB_V3';
-        const DB_VERSION = 1;
-        const STORE_NAME = 'inspections';
-        let db; let currentImagesArray = []; let editingRecordId = null; let editingRecordDate = null; let editingRecordTime = null;
-
-        const DEFAULT_CHECKLIST_CONFIG = {
-            "title": "ĐÁNH DẤU KHIẾM KHUYẾT",
-            "accordions": [
-                {
-                    "title": "Thiết Bị (Thử nghiệm & Xuống cấp)", "icon": "settings", "color": "blue",
-                    "sections": [ { "title": "Thử nghiệm thiết bị", "items": ["RE", "LBS", "RMU"] }, { "title": "Thiết bị VHLN xuống cấp", "items": ["DS", "LBFCO", "FCO", "RE", "LBS", "LA"] } ]
-                },
-                {
-                    "title": "Tình trạng Chưa Bọc", "icon": "shield-alert", "color": "orange",
-                    "sections": [ { "title": "Vị trí chưa bọc cách điện", "items": ["DS", "LBFCO", "FCO", "Bussing MBT", "LA", "LBS"] } ]
-                },
-                {
-                    "title": "Mối Nối & Cáp ngầm", "icon": "link", "color": "purple",
-                    "sections": [ { "title": "Mối nối", "items": ["Đỉnh sứ", "Gần đà", "Chưa dừng", "Không trung chưa dừng", "Chưa bọc", "Giáp níu nhiễm điện", "Cò đấu nhiều mối nối"] } ]
-                },
-                {
-                    "title": "Trụ, Đà, Sứ & Phụ Kiện", "icon": "zap", "color": "rose",
-                    "sections": [ { "title": "Trụ trung thế", "items": ["Sắt", "Nghiêng", "Thấp", "Nứt"] } ]
-                },
-                {
-                    "title": "Thông tin Khác", "icon": "info", "color": "gray",
-                    "sections": [ { "title": "Ghi nhận nhanh", "items": [ { "name": "Đo nhiệt độ (độ C)", "type": "text" }, { "name": "Đo khoảng cách (m)", "type": "text" } ] } ]
-                }
-            ]
-        };
-
-        const TAILWIND_COLORS = {
-            "blue": { border: "border-blue-200", btnBg: "bg-blue-50", btnHover: "hover:bg-blue-100", btnText: "text-blue-700", btnBorder: "border-blue-100", icon: "text-blue-500" },
-            "orange": { border: "border-orange-200", btnBg: "bg-orange-50", btnHover: "hover:bg-orange-100", btnText: "text-orange-700", btnBorder: "border-orange-100", icon: "text-orange-500" },
-            "purple": { border: "border-purple-200", btnBg: "bg-purple-50", btnHover: "hover:bg-purple-100", btnText: "text-purple-700", btnBorder: "border-purple-100", icon: "text-purple-500" },
-            "rose": { border: "border-rose-200", btnBg: "bg-rose-50", btnHover: "hover:bg-rose-100", btnText: "text-rose-700", btnBorder: "border-rose-100", icon: "text-rose-500" },
-            "green": { border: "border-green-200", btnBg: "bg-green-50", btnHover: "hover:bg-green-100", btnText: "text-green-700", btnBorder: "border-green-100", icon: "text-green-500" },
-            "gray": { border: "border-slate-200", btnBg: "bg-slate-50", btnHover: "hover:bg-slate-100", btnText: "text-slate-700", btnBorder: "border-slate-100", icon: "text-slate-500" }
-        };
-
-        function initDB() {
-            const request = indexedDB.open(DB_NAME, DB_VERSION);
-            request.onupgradeneeded = (e) => { if (!e.target.result.objectStoreNames.contains(STORE_NAME)) e.target.result.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true }); };
-            request.onsuccess = (e) => { db = e.target.result; loadRecords(); };
-
-            renderTuyenDropdown();
-            
-            // Phục hồi toàn bộ thông tin vị trí bao gồm CẢ SỐ TRỤ
-            const lastNhanhRe = localStorage.getItem('lastNhanhRe_KT'); if(lastNhanhRe) document.getElementById('nhanhre').value = lastNhanhRe;
-            const lastThietBi = localStorage.getItem('lastTenthietbi_KT'); if(lastThietBi) document.getElementById('tenthietbi').value = lastThietBi;
-            const lastTram = localStorage.getItem('lastTentram_KT'); if(lastTram) document.getElementById('tentram').value = lastTram;
-            const lastVitri = localStorage.getItem('lastVitri_KT'); if(lastVitri) document.getElementById('vitri').value = lastVitri;
-
-            loadChecklistConfig();
-        }
-
-        // --- RENDER TUYẾN DÂY ---
-        function renderTuyenDropdown() {
-            const select = document.getElementById('tuyen');
-            const saved = localStorage.getItem('tuyenConfig_KT');
-            let options = '<option value="">-- Chọn tuyến dây --</option>';
-            if (saved) {
-                try {
-                    const list = JSON.parse(saved);
-                    list.forEach(t => options += `<option value="${t}">${t}</option>`);
-                } catch(e) {}
-            } else {
-                options += `<option value="471 Phước Hòa">471 Phước Hòa</option><option value="472 Phước Hòa">472 Phước Hòa</option>`;
-            }
-            select.innerHTML = options + '<option value="Tuyến Khác">-- Khác --</option>';
-            const lastTuyen = localStorage.getItem('lastTuyen_KT');
-            if(lastTuyen) select.value = lastTuyen;
-        }
-
-        // --- IMPORT TUYẾN DÂY EXCEL ---
-        async function importTuyenConfig(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            toggleLoading(true, "Đang đọc Tuyến dây...");
-            try {
-                const arrayBuffer = await file.arrayBuffer();
-                const workbook = new ExcelJS.Workbook();
-                await workbook.xlsx.load(arrayBuffer);
-                const worksheet = workbook.worksheets[0];
-                let list = [];
-                worksheet.eachRow((row, rowNumber) => {
-                    const val = row.getCell(1).text;
-                    if(val && val.trim() !== '' && rowNumber > 1) list.push(val.trim()); // Bỏ qua dòng tiêu đề
-                });
-                if(list.length > 0) {
-                    localStorage.setItem('tuyenConfig_KT', JSON.stringify(list));
-                    renderTuyenDropdown();
-                    showToast(`Đã nạp ${list.length} tuyến dây!`);
-                } else {
-                    showToast("File không có dữ liệu ở cột A");
-                }
-            } catch(e) { showToast("Lỗi đọc file Excel"); }
-            toggleLoading(false);
-            event.target.value = '';
-        }
-
-        function loadChecklistConfig() {
-            const savedConfig = localStorage.getItem('checklistConfig_KT');
-            let config = DEFAULT_CHECKLIST_CONFIG;
-            if (savedConfig) { try { config = JSON.parse(savedConfig); } catch (e) {} }
-            renderChecklist(config);
-        }
-
-        function renderChecklist(config) {
-            document.getElementById('checklistTitle').textContent = config.title || "ĐÁNH DẤU KHIẾM KHUYẾT";
-            const container = document.getElementById('dynamicChecklistContainer');
-            container.innerHTML = '';
-            if (!config.accordions) return;
-
-            config.accordions.forEach((acc, index) => {
-                const accId = `dyn_acc_${index}`;
-                const colors = TAILWIND_COLORS[acc.color] || TAILWIND_COLORS["gray"];
-                let sectionsHtml = '';
-                if (acc.sections) {
-                    acc.sections.forEach((sec, secIndex) => {
-                        let itemsHtml = '';
-                        if (sec.items) {
-                            sec.items.forEach(item => {
-                                const isText = (typeof item === 'object' && item.type === 'text');
-                                const itemName = typeof item === 'object' ? item.name : item;
-                                const val = `${sec.title} - ${itemName}`;
-                                
-                                if (isText) {
-                                    itemsHtml += `
-                                        <div class="w-full bg-white border border-slate-200 rounded px-3 py-2 mt-1">
-                                            <label class="block text-[11px] font-bold text-slate-500 mb-1">${itemName}</label>
-                                            <input type="text" class="dyn-text-input w-full border-b border-blue-200 focus:border-blue-600 outline-none text-sm text-blue-800 pb-1" data-name="${val}" placeholder="Nhập nội dung vào đây..." oninput="updateErrorCount()">
-                                        </div>
-                                    `;
-                                } else {
-                                    itemsHtml += `
-                                        <label class="flex items-center space-x-2 cursor-pointer bg-white border border-slate-200 rounded px-3 py-1.5 hover:bg-slate-50">
-                                            <input type="checkbox" name="chk_loi" value="${val}" class="custom-checkbox w-4 h-4" onchange="updateErrorCount()">
-                                            <span class="text-sm text-slate-700">${itemName}</span>
-                                        </label>
-                                    `;
-                                }
-                            });
-                        }
-                        sectionsHtml += `<h4 class="text-[11px] font-bold text-slate-400 uppercase mb-2 ${secIndex > 0 ? 'mt-3' : ''}">${sec.title}</h4><div class="flex flex-wrap gap-2 mb-3">${itemsHtml}</div>${secIndex < acc.sections.length - 1 ? '<hr class="border-slate-100">' : ''}`;
-                    });
-                }
-                container.insertAdjacentHTML('beforeend', `<div class="bg-white rounded-lg shadow-sm border ${colors.border} overflow-hidden"><button type="button" class="w-full flex justify-between items-center p-3 ${colors.btnBg} ${colors.btnHover} focus:outline-none ${colors.btnText} border-b ${colors.btnBorder}" onclick="toggleAccordion('${accId}')"><div class="flex items-center font-bold"><i data-lucide="${acc.icon}" class="w-5 h-5 mr-2"></i> ${acc.title}</div><i data-lucide="chevron-down" class="w-5 h-5 ${colors.icon} transition-transform duration-300" id="${accId}-icon"></i></button><div id="${accId}-content" class="hidden p-3 bg-slate-50">${sectionsHtml}</div></div>`);
-            });
-            lucide.createIcons(); updateErrorCount();
-        }
-
-        function toggleSettings() { document.getElementById('settingsModal').classList.toggle('hidden'); }
-
-        async function downloadSampleExcel() {
-            try {
-                const workbook = new ExcelJS.Workbook(); const sheet = workbook.addWorksheet('Cau Hinh');
-                sheet.columns = [
-                    { header: 'Nhóm Lớn (VD: Thiết Bị)', key: 'nhomlon', width: 35 }, { header: 'Màu sắc (blue/orange/purple/rose/green)', key: 'mausac', width: 25 },
-                    { header: 'Icon (VD: settings, zap, trees, link...)', key: 'icon', width: 25 }, { header: 'Nhóm Nhỏ (VD: Thử nghiệm)', key: 'nhomnho', width: 30 },
-                    { header: 'Tên Lỗi / Tên Mục', key: 'tenloi', width: 35 }, { header: 'Loại nhập liệu (Để trống=Check, nhập text=Ô chữ)', key: 'loainhap', width: 45 }
-                ];
-                sheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } }; sheet.getRow(1).fill = { type: 'pattern', pattern:'solid', fgColor:{ argb:'FF1E40AF' } };
-                sheet.addRow(['Thiết Bị (Thử nghiệm & Xuống cấp)', 'blue', 'settings', 'Thử nghiệm thiết bị', 'RE', '']);
-                sheet.addRow(['Thông tin Khác', 'gray', 'info', 'Ghi nhận nhanh', 'Đo nhiệt độ (độ C)', 'text']);
-                sheet.addRow(['Thông tin Khác', 'gray', 'info', 'Ghi nhận nhanh', 'Ghi chú hiện trường', 'text']);
-                const buffer = await workbook.xlsx.writeBuffer();
-                saveAs(new Blob([buffer]), "Mau_CauHinh_KiemTraLuoiDien.xlsx");
-            } catch (err) { showToast("Lỗi tạo file Excel"); }
-        }
-
-        async function importChecklistConfig(event) {
-            const file = event.target.files[0]; if (!file) return;
-            const extension = file.name.split('.').pop().toLowerCase();
-            if (extension === 'json') {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try { const json = JSON.parse(e.target.result); localStorage.setItem('checklistConfig_KT', JSON.stringify(json)); renderChecklist(json); toggleSettings(); showToast("Đã cập nhật!"); } 
-                    catch (err) { alert("File JSON lỗi!"); }
-                }; reader.readAsText(file);
-            } else if (extension === 'xlsx') {
-                toggleLoading(true, "Đang xử lý Excel...");
-                try {
-                    const arrayBuffer = await file.arrayBuffer(); const workbook = new ExcelJS.Workbook(); await workbook.xlsx.load(arrayBuffer);
-                    const worksheet = workbook.worksheets[0]; let config = { title: "ĐÁNH DẤU KHIẾM KHUYẾT", accordions: [] };
-                    worksheet.eachRow((row, rowNum) => {
-                        if (rowNum === 1) return;
-                        const getText = (c) => { if(!c.value) return ''; return (c.value.richText ? c.value.richText.map(t=>t.text).join('') : c.text).trim(); };
-                        const nhomLon = getText(row.getCell(1)); const mauSac = getText(row.getCell(2))||'gray'; const icon = getText(row.getCell(3))||'list';
-                        const nhomNho = getText(row.getCell(4))||'Chung'; const tenLoi = getText(row.getCell(5)); 
-                        const loai = getText(row.getCell(6)).toLowerCase() === 'text' ? 'text' : 'checkbox';
-                        if (!nhomLon || !tenLoi) return;
-                        let acc = config.accordions.find(a => a.title === nhomLon); if (!acc) { acc = { title: nhomLon, icon: icon, color: mauSac, sections: [] }; config.accordions.push(acc); }
-                        let sec = acc.sections.find(s => s.title === nhomNho); if (!sec) { sec = { title: nhomNho, items: [] }; acc.sections.push(sec); }
-                        let exists = sec.items.find(i => (typeof i === 'string' ? i : i.name) === tenLoi);
-                        if (!exists) sec.items.push(loai === 'text' ? { name: tenLoi, type: 'text' } : tenLoi);
-                    });
-                    localStorage.setItem('checklistConfig_KT', JSON.stringify(config)); renderChecklist(config); toggleSettings(); showToast("Cập nhật thành công!");
-                } catch (err) { alert("Lỗi đọc file Excel."); } finally { toggleLoading(false); }
-            }
-            event.target.value = '';
-        }
-
-        function resetDefaultConfig() {
-            if(confirm("Xóa danh sách Tuyến dây tải lên và Khôi phục Danh mục lỗi gốc?")) {
-                localStorage.removeItem('checklistConfig_KT'); localStorage.removeItem('tuyenConfig_KT');
-                renderTuyenDropdown(); renderChecklist(DEFAULT_CHECKLIST_CONFIG); toggleSettings(); showToast("Đã khôi phục mặc định!");
-            }
-        }
-
-        function switchTab(tabId) {
-            document.getElementById('formTab').classList.add('hidden'); document.getElementById('listTab').classList.add('hidden');
-            document.getElementById('btnFormTab').className = "flex-1 py-3 flex flex-col items-center justify-center text-slate-400 border-t-2 border-transparent hover:text-blue-500";
-            document.getElementById('btnListTab').className = "flex-1 py-3 flex flex-col items-center justify-center text-slate-400 border-t-2 border-transparent hover:text-blue-500";
-            document.getElementById(tabId).classList.remove('hidden');
-            const activeBtn = tabId === 'formTab' ? document.getElementById('btnFormTab') : document.getElementById('btnListTab');
-            activeBtn.className = "flex-1 py-3 flex flex-col items-center justify-center text-blue-600 bg-blue-50 border-t-2 border-blue-600";
-            if(tabId === 'listTab') loadRecords(); document.querySelector('main').scrollTo(0,0);
-        }
-
-        function showToast(m, d=3000) { const t = document.getElementById('toastMessage'); t.querySelector('span').textContent = m; t.classList.remove('opacity-0'); setTimeout(()=>t.classList.add('opacity-0'), d); }
-        function toggleLoading(s, t="Đang xử lý...") { document.getElementById('loadingText').textContent = t; document.getElementById('loadingOverlay').style.display = s ? 'flex' : 'none'; }
-        function toggleAccordion(id) { document.getElementById(`${id}-content`).classList.toggle('hidden'); document.getElementById(`${id}-icon`).classList.toggle('rotate-180'); }
-        
-        function updateErrorCount() {
-            let count = document.querySelectorAll('input[name="chk_loi"]:checked').length;
-            document.querySelectorAll('.dyn-text-input').forEach(input => { if(input.value.trim() !== '') count++; });
-            document.getElementById('selectedErrorCount').textContent = count;
-        }
-
-        function previewAndCompressMultipleImages(event) {
-            const files = event.target.files; if (!files || files.length === 0) return;
-            const gallery = document.getElementById('imageGallery'); showToast(`Đang xử lý ${files.length} ảnh...`);
-            const t1 = `Vị trí: ${document.getElementById('tuyen').value} - Trụ: ${document.getElementById('vitri').value || '?'}`;
-            const t2 = `Thời gian: ${new Date().toLocaleTimeString('vi-VN')} ${new Date().toLocaleDateString('vi-VN')}`;
-            Array.from(files).forEach(file => {
-                const reader = new FileReader(); reader.readAsDataURL(file);
-                reader.onload = (e) => compressImage(e.target.result, (b64) => {
-                    currentImagesArray.push(b64); const id = 'img_'+Date.now()+Math.random();
-                    gallery.insertAdjacentHTML('beforeend', `<div class="relative shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-slate-200" id="${id}"><img src="${b64}" class="w-full h-full object-cover" /><button type="button" onclick="removeImage('${b64}', '${id}')" class="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5"><i data-lucide="x" class="w-3 h-3"></i></button></div>`);
-                    lucide.createIcons();
-                }, t1, t2);
-            }); event.target.value = '';
-        }
-
-        function compressImage(dataUrl, callback, t1, t2) {
-            const img = new Image(); img.src = dataUrl;
-            img.onload = () => {
-                const canvas = document.getElementById('compressCanvas'); const ctx = canvas.getContext('2d');
-                let w = img.width; let h = img.height; if(w > 800) { h = Math.round((h*800)/w); w = 800; }
-                canvas.width = w; canvas.height = h; ctx.drawImage(img, 0, 0, w, h);
-                if(t1) { ctx.fillStyle = "rgba(0,0,0,0.5)"; ctx.fillRect(0, h-54, w, 54); ctx.fillStyle="white"; ctx.font="bold 16px sans-serif"; ctx.fillText(t1, 10, h-32); ctx.fillStyle="#fbbf24"; ctx.font="14px sans-serif"; ctx.fillText(t2, 10, h-10); }
-                callback(canvas.toDataURL('image/jpeg', 0.6));
-            };
-        }
-        function removeImage(b64, id) { currentImagesArray = currentImagesArray.filter(i => i !== b64); document.getElementById(id).remove(); }
-        
-        function resetForm() {
-            // KHÔNG xóa Số Trụ nữa theo yêu cầu
-            // document.getElementById('vitri').value = '';
-            document.getElementById('ut1').checked = true;
-            document.querySelectorAll('input[name="chk_loi"]').forEach(cb => cb.checked = false);
-            document.querySelectorAll('.dyn-text-input').forEach(input => input.value = ''); 
-            updateErrorCount();
-            document.getElementById('denghi').value = ''; document.getElementById('ghichu').value = '';
-            currentImagesArray = []; document.getElementById('imageGallery').innerHTML = '';
-        }
-
-        function cancelEdit() {
-            editingRecordId = null; editingRecordDate = null; editingRecordTime = null;
-            const btnSave = document.getElementById('btnSave'); btnSave.innerHTML = '<i data-lucide="save" class="w-5 h-5 mr-2"></i> LƯU PHIẾU';
-            btnSave.classList.replace('bg-orange-600', 'bg-blue-600'); btnSave.classList.replace('hover:bg-orange-700', 'hover:bg-blue-700');
-            document.getElementById('btnCancelEdit').classList.add('hidden');
-            resetForm(); lucide.createIcons(); showToast("Đã hủy chỉnh sửa");
-        }
-
-        function saveRecord() {
-            const tuyen = document.getElementById('tuyen').value; const vitri = document.getElementById('vitri').value.trim();
-            if (!tuyen) { showToast('⚠️ Vui lòng chọn Tuyến dây!'); return; } if (!vitri) { showToast('⚠️ Vui lòng nhập Số trụ!'); return; }
-
-            // LƯU LẠI TOÀN BỘ THÔNG TIN VỊ TRÍ VÀO MÁY (Bao gồm cả Số trụ)
-            localStorage.setItem('lastTuyen_KT', tuyen); localStorage.setItem('lastNhanhRe_KT', document.getElementById('nhanhre').value.trim());
-            localStorage.setItem('lastTenthietbi_KT', document.getElementById('tenthietbi').value.trim()); localStorage.setItem('lastTentram_KT', document.getElementById('tentram').value.trim());
-            localStorage.setItem('lastVitri_KT', vitri);
-
-            const now = new Date();
-            const checkedBoxes = Array.from(document.querySelectorAll('input[name="chk_loi"]:checked')).map(cb => cb.value);
-            let dynTexts = {}; let textDisplay = [];
-            document.querySelectorAll('.dyn-text-input').forEach(input => {
-                const val = input.value.trim();
-                if(val) { const name = input.getAttribute('data-name'); dynTexts[name] = val; textDisplay.push(`${name}: ${val}`); }
-            });
-
-            const priorityRadio = document.querySelector('input[name="uutien"]:checked');
-
-            const record = {
-                ngay: editingRecordId ? editingRecordDate : now.toLocaleDateString('vi-VN'), gio: editingRecordId ? editingRecordTime : now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-                tuyen: tuyen, nhanhre: document.getElementById('nhanhre').value.trim(), tenthietbi: document.getElementById('tenthietbi').value.trim(), tentram: document.getElementById('tentram').value.trim(),
-                vitri: vitri, uutien: priorityRadio ? priorityRadio.value : 'Bình thường',
-                loi_count: checkedBoxes.length + textDisplay.length,
-                loi_chitiet: [...checkedBoxes, ...textDisplay].join(",\n"), 
-                loi_raw: { chk: checkedBoxes, txt: dynTexts }, 
-                denghi: document.getElementById('denghi').value.trim(), ghichu: document.getElementById('ghichu').value.trim(), hinhanh_array: [...currentImagesArray]
-            };
-
-            if (editingRecordId) record.id = editingRecordId;
-            const request = editingRecordId ? db.transaction([STORE_NAME], 'readwrite').objectStore(STORE_NAME).put(record) : db.transaction([STORE_NAME], 'readwrite').objectStore(STORE_NAME).add(record);
-            request.onsuccess = () => {
-                showToast(editingRecordId ? '✅ Cập nhật thành công!' : '✅ Lưu phiếu thành công!');
-                if (editingRecordId) { cancelEdit(); switchTab('listTab'); } else { resetForm(); }
-                loadRecords();
-            };
-        }
-
-        function editRecord(id) {
-            db.transaction([STORE_NAME], 'readonly').objectStore(STORE_NAME).get(id).onsuccess = (e) => {
-                const record = e.target.result; if(!record) return;
-                editingRecordId = id; editingRecordDate = record.ngay; editingRecordTime = record.gio;
-                document.getElementById('tuyen').value = record.tuyen; document.getElementById('nhanhre').value = record.nhanhre || '';
-                document.getElementById('tenthietbi').value = record.tenthietbi || ''; document.getElementById('tentram').value = record.tentram || '';
-                document.getElementById('vitri').value = record.vitri;
-                for(let r of document.getElementsByName('uutien')) { if(r.value === record.uutien) r.checked = true; }
-
-                const loiArray = record.loi_raw ? record.loi_raw.chk : (record.loi_chitiet ? record.loi_chitiet.split(',\n') : []);
-                document.querySelectorAll('input[name="chk_loi"]').forEach(cb => { cb.checked = loiArray.includes(cb.value); });
-                
-                const txtObj = record.loi_raw ? record.loi_raw.txt : {};
-                document.querySelectorAll('.dyn-text-input').forEach(input => { const name = input.getAttribute('data-name'); input.value = txtObj[name] || ''; });
-                updateErrorCount();
-
-                document.getElementById('denghi').value = record.denghi || ''; document.getElementById('ghichu').value = record.ghichu || '';
-                currentImagesArray = []; document.getElementById('imageGallery').innerHTML = '';
-                if(record.hinhanh_array) record.hinhanh_array.forEach(b64 => {
-                    currentImagesArray.push(b64); const id = 'img_'+Date.now()+Math.random();
-                    document.getElementById('imageGallery').insertAdjacentHTML('beforeend', `<div class="relative shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-slate-200" id="${id}"><img src="${b64}" class="w-full h-full object-cover" /><button type="button" onclick="removeImage('${b64}', '${id}')" class="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5"><i data-lucide="x" class="w-3 h-3"></i></button></div>`);
-                });
-                const btnSave = document.getElementById('btnSave'); btnSave.innerHTML = '<i data-lucide="edit" class="w-5 h-5 mr-2"></i> CẬP NHẬT PHIẾU'; btnSave.classList.replace('bg-blue-600', 'bg-orange-600'); document.getElementById('btnCancelEdit').classList.remove('hidden'); switchTab('formTab');
-            };
-        }
-
-        function loadRecords() {
-            if(!db) return; db.transaction([STORE_NAME], 'readonly').objectStore(STORE_NAME).getAll().onsuccess = (e) => {
-                const records = e.target.result; document.getElementById('tabCount').textContent = records.length; document.getElementById('footerCount').textContent = records.length;
-                const list = document.getElementById('recordsList'); list.innerHTML = '';
-                if(records.length === 0) { list.innerHTML = `<div class="text-center p-8 text-slate-400 mt-10"><i data-lucide="clipboard-list" class="w-12 h-12 mb-2 mx-auto opacity-50"></i><p>Chưa có dữ liệu.</p></div>`; lucide.createIcons(); return; }
-                records.reverse().forEach((record, idx) => {
-                    const color = record.uutien === 'Khẩn cấp' ? 'text-red-600 bg-red-100 border-red-200' : record.uutien === 'Cảnh báo' ? 'text-yellow-600 bg-yellow-100 border-yellow-200' : 'text-green-600 bg-green-100 border-green-200';
-                    const img = record.hinhanh_array ? record.hinhanh_array.length : 0;
-                    list.insertAdjacentHTML('beforeend', `
-                        <div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden relative">
-                             <button onclick="editRecord(${record.id})" class="absolute top-2 right-10 p-1 text-slate-400 hover:text-blue-500 z-10"><i data-lucide="edit-3" class="w-5 h-5"></i></button>
-                             <button onclick="deleteRecord(${record.id})" class="absolute top-2 right-2 p-1 text-slate-300 hover:text-red-500 z-10"><i data-lucide="x" class="w-5 h-5"></i></button>
-                            <div class="p-3 pb-2 flex space-x-3"><div class="bg-slate-100 text-slate-500 font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0 border border-slate-200">${records.length - idx}</div>
-                                <div><h3 class="font-bold text-lg text-slate-800 leading-none mb-1">${record.vitri} <span class="text-xs font-normal text-slate-500 ml-1">(${record.tuyen}${record.nhanhre ? ` - ${record.nhanhre}` : ''})</span></h3>
-                                    <div class="flex items-center gap-2 mt-2"><span class="text-[10px] font-bold px-2 py-0.5 rounded border ${color}">${record.uutien.toUpperCase()}</span>
-                                        ${record.loi_count > 0 ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded border text-red-600 bg-red-50 border-red-200">LỖI: ${record.loi_count}</span>` : ''}
-                                        ${img > 0 ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded border text-blue-600 bg-blue-50 border-blue-200"><i data-lucide="image" class="w-3 h-3 inline mr-1"></i>${img} ẢNH</span>` : ''}
-                                    </div></div></div></div>`);
-                }); lucide.createIcons();
-            };
-        }
-
-        function deleteRecord(id) { if(confirm("Xóa phiếu này?")) db.transaction([STORE_NAME], 'readwrite').objectStore(STORE_NAME).delete(id).onsuccess = () => loadRecords(); }
-        function clearAllData() { if(confirm("Xóa TOÀN BỘ lịch sử?")) db.transaction([STORE_NAME], 'readwrite').objectStore(STORE_NAME).clear().onsuccess = () => loadRecords(); }
-
-        async function exportToExcelJS() {
-            if(!db) return; const records = await new Promise(r => db.transaction([STORE_NAME], 'readonly').objectStore(STORE_NAME).getAll().onsuccess = e => r(e.target.result));
-            if(records.length === 0) { showToast("Không có dữ liệu!"); return; }
-            toggleLoading(true, "Đang xử lý xuất Excel...");
-            setTimeout(async () => {
-                try {
-                    const workbook = new ExcelJS.Workbook(); const worksheet = workbook.addWorksheet('Bao Cao');
-                    worksheet.columns = [ { header: 'STT', key: 'stt', width: 5 }, { header: 'Ngày', key: 'ngay', width: 12 }, { header: 'Giờ', key: 'gio', width: 10 }, { header: 'Tuyến dây', key: 'tuyen', width: 20 }, { header: 'Nhánh rẽ', key: 'nhanhre', width: 15 }, { header: 'Tên thiết bị', key: 'tenthietbi', width: 15 }, { header: 'Tên trạm', key: 'tentram', width: 15 }, { header: 'Số trụ', key: 'vitri', width: 10 }, { header: 'Ưu tiên', key: 'uutien', width: 12 }, { header: 'SL Lỗi', key: 'loi_count', width: 8 }, { header: 'Chi tiết lỗi / Thông tin ghi nhận', key: 'loi_chitiet', width: 40 }, { header: 'Đề nghị', key: 'denghi', width: 25 }, { header: 'Ghi chú', key: 'ghichu', width: 20 }, { header: 'Ảnh 1', key: 'anh1', width: 25 }, { header: 'Ảnh 2', key: 'anh2', width: 25 }, { header: 'Ảnh 3', key: 'anh3', width: 25 } ];
-                    worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } }; worksheet.getRow(1).fill = { type: 'pattern', pattern:'solid', fgColor:{ argb:'FF1E40AF' } };
-                    records.forEach((item, index) => {
-                        const row = worksheet.addRow({ stt: index + 1, ngay: item.ngay, gio: item.gio, tuyen: item.tuyen, nhanhre: item.nhanhre, tenthietbi: item.tenthietbi, tentram: item.tentram, vitri: item.vitri, uutien: item.uutien, loi_count: item.loi_count, loi_chitiet: item.loi_chitiet, denghi: item.denghi, ghichu: item.ghichu });
-                        if (item.hinhanh_array && item.hinhanh_array.length > 0) {
-                            row.height = 100; const maxImages = Math.min(item.hinhanh_array.length, 3);
-                            for(let i = 0; i < maxImages; i++) {
-                                const imageId = workbook.addImage({ base64: item.hinhanh_array[i].split(',')[1], extension: 'jpeg' });
-                                worksheet.addImage(imageId, { tl: { col: 13 + i, row: index + 1 }, ext: { width: 120, height: 120 }, editAs: 'oneCell' });
-                            }
-                        }
-                        row.alignment = { vertical: 'middle', wrapText: true };
-                    });
-                    saveAs(new Blob([await workbook.xlsx.writeBuffer()]), `BaoCao_KTLD_${Date.now()}.xlsx`); showToast("Đã xuất Excel!");
-                } catch (e) { showToast("Lỗi tạo Excel!"); } finally { toggleLoading(false); }
-            }, 300);
-        }
+        document.addEventListener("contextmenu",e=>e.preventDefault());document.onkeydown=function(e){if(e.keyCode==123||(e.ctrlKey&&e.shiftKey&&(e.keyCode==73||e.keyCode==67||e.keyCode==74))||(e.ctrlKey&&e.keyCode==85))return false};
+        lucide.createIcons();const DB_NAME="LuoiDienDB_V3",DB_VERSION=1,STORE_NAME="inspections";let db,currentImagesArray=[],editingRecordId=null,editingRecordDate=null,editingRecordTime=null;const DEFAULT_CHECKLIST_CONFIG={title:"ĐÁNH DẤU KHIẾM KHUYẾT",accordions:[{title:"Thiết Bị (Thử nghiệm & Xuống cấp)",icon:"settings",color:"blue",sections:[{title:"Thử nghiệm thiết bị",items:[{name:"RE",type:"checkbox"},{name:"LBS",type:"checkbox"},{name:"RMU",type:"checkbox"}]},{title:"Thiết bị VHLN xuống cấp",items:[{name:"DS",type:"checkbox"},{name:"LBFCO",type:"checkbox"},{name:"FCO",type:"checkbox"},{name:"RE",type:"checkbox"},{name:"LBS",type:"checkbox"},{name:"LA",type:"checkbox"}]}]},{title:"Tình trạng Chưa Bọc",icon:"shield-alert",color:"orange",sections:[{title:"Vị trí chưa bọc cách điện",items:[{name:"DS",type:"checkbox"},{name:"LBFCO",type:"checkbox"},{name:"FCO",type:"checkbox"},{name:"Bussing MBT",type:"checkbox"},{name:"LA",type:"checkbox"},{name:"LBS",type:"checkbox"}]}]},{title:"Mối Nối & Cáp ngầm",icon:"link",color:"purple",sections:[{title:"Mối nối",items:[{name:"Đỉnh sứ",type:"checkbox"},{name:"Gần đà",type:"checkbox"},{name:"Chưa dừng",type:"checkbox"},{name:"Không trung chưa dừng",type:"checkbox"},{name:"Chưa bọc",type:"checkbox"},{name:"Giáp níu nhiễm điện",type:"checkbox"},{name:"Cò đấu nhiều mối nối",type:"checkbox"}]},{title:"Đầu cáp ngầm",items:[{name:"Thấp",type:"checkbox"},{name:"Đổi màu",type:"checkbox"},{name:"Chéo pha",type:"checkbox"}]},{title:"Đoạn lưới trung thế",items:[{name:"Chùng thấp",type:"checkbox"},{name:"khoảng trụ lớn",type:"checkbox"},{name:"Bị xâm phạm HLAT",type:"checkbox"},{name:"Có vật lạ",type:"checkbox"},{name:"Nhiều mối nối",type:"checkbox"},{name:"Lưới trần",type:"checkbox"},{name:"Khu vực đông dân cư",type:"checkbox"}]}]},{title:"Trụ, Đà, Sứ & Phụ Kiện",icon:"zap",color:"rose",sections:[{title:"Trụ trung thế",items:[{name:"Sắt",type:"checkbox"},{name:"Nghiêng",type:"checkbox"},{name:"Thấp",type:"checkbox"},{name:"Nứt",type:"checkbox"}]},{title:"Đà",items:[{name:"Cong, vênh",type:"checkbox"},{name:"Rỉ sét",type:"checkbox"},{name:"Dư thừa",type:"checkbox"}]},{title:"Sứ cách điện",items:[{name:"Sứ đứng ố vàng",type:"checkbox"},{name:"Sứ đứng nghiêng",type:"checkbox"},{name:"Sứ dư thừa",type:"checkbox"},{name:"Thiếu sứ đứng",type:"checkbox"},{name:"Sứ treo (sứ, thủy tinh)",type:"checkbox"},{name:"Sứ treo xuống cấp",type:"checkbox"}]},{title:"Phụ kiện",items:[{name:"Kẹp căng dây",type:"checkbox"},{name:"Giáp buộc kim loại",type:"checkbox"},{name:"Giáp buộc chưa phù hợp",type:"checkbox"}]}]},{title:"Hành Lang Cây Xanh",icon:"trees",color:"green",sections:[{title:"Vi phạm cây xanh",items:[{name:"Gần điểm hở",type:"checkbox"},{name:"Chạm lưới",type:"checkbox"}]}]}]},TAILWIND_COLORS={blue:{border:"border-blue-200",btnBg:"bg-blue-50",btnHover:"hover:bg-blue-100",btnText:"text-blue-700",btnBorder:"border-blue-100",icon:"text-blue-500"},orange:{border:"border-orange-200",btnBg:"bg-orange-50",btnHover:"hover:bg-orange-100",btnText:"text-orange-700",btnBorder:"border-orange-100",icon:"text-orange-500"},purple:{border:"border-purple-200",btnBg:"bg-purple-50",btnHover:"hover:bg-purple-100",btnText:"text-purple-700",btnBorder:"border-purple-100",icon:"text-purple-500"},rose:{border:"border-rose-200",btnBg:"bg-rose-50",btnHover:"hover:bg-rose-100",btnText:"text-rose-700",btnBorder:"border-rose-100",icon:"text-rose-500"},green:{border:"border-green-200",btnBg:"bg-green-50",btnHover:"hover:bg-green-100",btnText:"text-green-700",btnBorder:"border-green-100",icon:"text-green-500"},gray:{border:"border-slate-200",btnBg:"bg-slate-50",btnHover:"hover:bg-slate-100",btnText:"text-slate-700",btnBorder:"border-slate-100",icon:"text-slate-500"}};function initDB(){const e=indexedDB.open(DB_NAME,DB_VERSION);e.onupgradeneeded=e=>{e.target.result.objectStoreNames.contains(STORE_NAME)||e.target.result.createObjectStore(STORE_NAME,{keyPath:"id",autoIncrement:!0})},e.onsuccess=e=>{db=e.target.result,loadRecords()},loadTuyenList(),loadLocationInfo(),loadChecklistConfig()}function loadLocationInfo(){document.getElementById("nhanhre").value=localStorage.getItem("lastNhanhRe_KT")||"",document.getElementById("tenthietbi").value=localStorage.getItem("lastThietBi_KT")||"",document.getElementById("tentram").value=localStorage.getItem("lastTram_KT")||"",document.getElementById("vitri").value=localStorage.getItem("lastViTri_KT")||""}function saveLocationInfo(){localStorage.setItem("lastTuyen_KT",document.getElementById("tuyen").value),localStorage.setItem("lastNhanhRe_KT",document.getElementById("nhanhre").value),localStorage.setItem("lastThietBi_KT",document.getElementById("tenthietbi").value),localStorage.setItem("lastTram_KT",document.getElementById("tentram").value),localStorage.setItem("lastViTri_KT",document.getElementById("vitri").value)}function loadTuyenList(){const e=JSON.parse(localStorage.getItem("tuyenList_KT")||"[]"),t=document.getElementById("tuyen");t.innerHTML='<option value="">-- Chọn tuyến dây --</option>',e.forEach(e=>t.insertAdjacentHTML("beforeend",`<option value="${e}">${e}</option>`)),t.insertAdjacentHTML("beforeend",'<option value="Tuyến Khác">-- Khác --</option>');const n=localStorage.getItem("lastTuyen_KT");n&&(t.value=n)}function loadChecklistConfig(){const e=localStorage.getItem("checklistConfig_KT");let t=DEFAULT_CHECKLIST_CONFIG;if(e)try{t=JSON.parse(e)}catch(e){}renderChecklist(t)}function renderChecklist(config){document.getElementById("checklistTitle").textContent=config.title||"ĐÁNH DẤU KHIẾM KHUYẾT";const container=document.getElementById("dynamicChecklistContainer");if(container.innerHTML="",!config.accordions||0===config.accordions.length)return;config.accordions.forEach((acc,accIdx)=>{const accId=`dyn_acc_${accIdx}`,colorCls=TAILWIND_COLORS[acc.color]||TAILWIND_COLORS.gray;let sectionsHtml="";acc.sections&&acc.sections.forEach((sec,secIdx)=>{let itemsHtml="";sec.items&&(sec.items.forEach(item=>{"string"==typeof item&&(item={name:item,type:"checkbox"});const errorName=`${sec.title} - ${item.name}`;"text"===item.type?itemsHtml+=`<div class="w-full mt-2 mb-1"><label class="block text-xs font-medium text-slate-500 mb-1">${item.name}</label><input type="text" name="txt_loi" data-name="${errorName}" class="w-full border border-slate-300 rounded p-2 text-sm outline-none focus:border-blue-500" placeholder="Nhập ${item.name}..."></div>`:itemsHtml+=`<label class="flex items-center space-x-2 cursor-pointer bg-white border border-slate-200 rounded px-3 py-1.5 hover:bg-slate-50"><input type="checkbox" name="chk_loi" value="${errorName}" class="custom-checkbox w-4 h-4" onchange="updateErrorCount()"><span class="text-sm text-slate-700">${item.name}</span></label>`}));sectionsHtml+=`<h4 class="text-[11px] font-bold text-slate-400 uppercase mb-2 ${secIdx>0?"mt-3":""}">${sec.title}</h4><div class="flex flex-wrap gap-2 mb-3">${itemsHtml}</div>${secIdx<acc.sections.length-1?'<hr class="border-slate-100">':""}`});container.insertAdjacentHTML("beforeend",`<div class="bg-white rounded-lg shadow-sm border ${colorCls.border} overflow-hidden"><button type="button" class="w-full flex justify-between items-center p-3 ${colorCls.btnBg} ${colorCls.btnHover} focus:outline-none ${colorCls.btnText} border-b ${colorCls.btnBorder}" onclick="toggleAccordion('${accId}')"><div class="flex items-center font-bold"><i data-lucide="${acc.icon}" class="w-5 h-5 mr-2"></i> ${acc.title}</div><i data-lucide="chevron-down" class="w-5 h-5 ${colorCls.icon} transition-transform duration-300" id="${accId}-icon"></i></button><div id="${accId}-content" class="hidden p-3 bg-white">${sectionsHtml}</div></div>`)});lucide.createIcons();updateErrorCount()}function toggleSettings(){document.getElementById("settingsModal").classList.toggle("hidden")}async function importTuyenExcel(e){const file=e.target.files[0];if(!file)return;toggleLoading(!0,"Đang nạp danh sách tuyến...");try{const buffer=await file.arrayBuffer(),wb=new ExcelJS.Workbook;await wb.xlsx.load(buffer);let arr=[];wb.worksheets[0].eachRow((row,rowNum)=>{if(1===rowNum)return;const txt=row.getCell(1).text;txt&&arr.push(txt.trim())});localStorage.setItem("tuyenList_KT",JSON.stringify(arr));loadTuyenList();showToast("Đã cập nhật danh sách Tuyến dây!");toggleSettings()}catch(err){alert("Lỗi file Excel Tuyến dây")}toggleLoading(!1);e.target.value=""}async function importChecklistConfig(e){const file=e.target.files[0];if(!file)return;const ext=file.name.split(".").pop().toLowerCase();if("json"===ext){const reader=new FileReader;reader.onload=e=>{try{const json=JSON.parse(e.target.result);localStorage.setItem("checklistConfig_KT",JSON.stringify(json));renderChecklist(json);toggleSettings();showToast("Đã cập nhật cấu hình!")}catch(err){alert("Lỗi định dạng JSON!")}};reader.readAsText(file)}else if("xlsx"===ext){toggleLoading(!0,"Đang xử lý file Excel...");try{const buffer=await file.arrayBuffer(),wb=new ExcelJS.Workbook;await wb.xlsx.load(buffer);let config={title:"ĐÁNH DẤU KHIẾM KHUYẾT",accordions:[]};wb.worksheets[0].eachRow((row,rowNum)=>{if(1===rowNum)return;const getText=c=>c.value?(c.value.richText?c.value.richText.map(rt=>rt.text).join(""):c.text).trim():"";const accTitle=getText(row.getCell(1)),color=getText(row.getCell(2))||"gray",icon=getText(row.getCell(3))||"list",secTitle=getText(row.getCell(4))||"Chung",errName=getText(row.getCell(5)),type="text"===getText(row.getCell(6)).toLowerCase()?"text":"checkbox";if(!accTitle||!errName)return;let acc=config.accordions.find(a=>a.title===accTitle);acc||(acc={title:accTitle,icon:icon,color:color,sections:[]},config.accordions.push(acc));let sec=acc.sections.find(s=>s.title===secTitle);sec||(sec={title:secTitle,items:[]},acc.sections.push(sec));sec.items.find(i=>i.name===errName)||sec.items.push({name:errName,type:type})});localStorage.setItem("checklistConfig_KT",JSON.stringify(config));renderChecklist(config);toggleSettings();showToast("Đã cập nhật cấu hình Excel!")}catch(err){alert("Lỗi đọc file Excel cấu hình.")}toggleLoading(!1)}e.target.value=""}async function downloadSampleExcel(){try{const e=new ExcelJS.Workbook,t=e.addWorksheet("Cau Hinh");t.columns=[{header:"Nhóm Lớn",width:30},{header:"Màu (blue/orange...)",width:20},{header:"Icon (lucide.dev)",width:20},{header:"Nhóm Nhỏ",width:30},{header:"Tên Lỗi / Tên Trường",width:30},{header:'Loại (để trống hoặc "text")',width:25}],t.getRow(1).font={bold:!0,color:{argb:"FFFFFFFF"}},t.getRow(1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF1E40AF"}},t.addRow(["Thiết Bị","blue","settings","Thử nghiệm","RE",""]),t.addRow(["Đo thông số","orange","activity","Đo đạc","Nhiệt độ mối nối","text"]);const n=await e.xlsx.writeBuffer();saveAs(new Blob([n]),"Mau_CauHinh_KiemTra.xlsx")}catch(e){}}function resetDefaultConfig(){confirm("Khôi phục danh mục gốc?")&&(localStorage.removeItem("checklistConfig_KT"),renderChecklist(DEFAULT_CHECKLIST_CONFIG),toggleSettings(),showToast("Đã khôi phục!"))}initDB();function switchTab(e){document.getElementById("formTab").classList.add("hidden"),document.getElementById("listTab").classList.add("hidden"),document.getElementById("btnFormTab").classList.remove("text-blue-600","bg-blue-50","border-blue-600"),document.getElementById("btnFormTab").classList.add("text-slate-400","border-transparent"),document.getElementById("btnListTab").classList.remove("text-blue-600","bg-blue-50","border-blue-600"),document.getElementById("btnListTab").classList.add("text-slate-400","border-transparent"),document.getElementById(e).classList.remove("hidden");const t="formTab"===e?document.getElementById("btnFormTab"):document.getElementById("btnListTab");t.classList.remove("text-slate-400","border-transparent"),t.classList.add("text-blue-600","bg-blue-50","border-blue-600"),"listTab"===e&&loadRecords(),document.querySelector("main").scrollTo(0,0)}function showToast(e,t=3e3){const n=document.getElementById("toastMessage");n.querySelector("span").textContent=e,n.classList.remove("opacity-0"),setTimeout(()=>n.classList.add("opacity-0"),t)}function toggleLoading(e,t="Đang xử lý..."){document.getElementById("loadingText").textContent=t,document.getElementById("loadingOverlay").style.display=e?"flex":"none"}function toggleAccordion(e){document.getElementById(e+"-content").classList.toggle("hidden"),document.getElementById(e+"-icon").classList.toggle("rotate-180")}function updateErrorCount(){document.getElementById("selectedErrorCount").textContent=document.querySelectorAll('input[name="chk_loi"]:checked').length+Array.from(document.querySelectorAll('input[name="txt_loi"]')).filter(e=>""!==e.value.trim()).length}document.addEventListener("input",e=>{"txt_loi"===e.target.name&&updateErrorCount()});function previewAndCompressMultipleImages(e){const t=e.target.files;if(!t||0===t.length)return;const n=document.getElementById("imageGallery");showToast(`Đang xử lý ${t.length} ảnh...`);const o=document.getElementById("tuyen").value||"Chưa rõ",l=document.getElementById("nhanhre").value.trim(),c=document.getElementById("vitri").value.trim()||"Chưa rõ",a=new Date,r=`Vị trí: ${o}${l?" - "+l:""} - Trụ: ${c}`,s=`Thời gian: ${a.toLocaleTimeString("vi-VN")} ${a.toLocaleDateString("vi-VN")}`;Array.from(t).forEach(e=>{const t=new FileReader;t.onload=e=>{const t=new Image;t.src=e.target.result,t.onload=()=>{const e=document.getElementById("compressCanvas"),o=e.getContext("2d");let l=t.width,c=t.height;l>800&&(c=Math.round(c*800/l),l=800),e.width=l,e.height=c,o.drawImage(t,0,0,l,c),o.fillStyle="rgba(0,0,0,0.5)",o.fillRect(0,c-54,l,54),o.fillStyle="white",o.font="bold 16px sans-serif",o.fillText(r,10,c-32),o.fillStyle="#fbbf24",o.font="14px sans-serif",o.fillText(s,10,c-10);const a=e.toDataURL("image/jpeg",.6);currentImagesArray.push(a);const u="img_"+Date.now()+Math.random();n.insertAdjacentHTML("beforeend",`<div class="relative shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-slate-200" id="${u}"><img src="${a}" class="w-full h-full object-cover" /><button type="button" onclick="removeImage('${a}', '${u}')" class="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-90 hover:opacity-100"><i data-lucide="x" class="w-3 h-3"></i></button></div>`),lucide.createIcons()}},t.readAsDataURL(e)}),e.target.value=""}function removeImage(e,t){currentImagesArray=currentImagesArray.filter(t=>t!==e),document.getElementById(t).remove()}function clearAllImages(){currentImagesArray=[],document.getElementById("imageGallery").innerHTML=""}function resetForm(){document.getElementById("ut1").checked=!0,document.querySelectorAll('input[name="chk_loi"]').forEach(e=>e.checked=!1),document.querySelectorAll('input[name="txt_loi"]').forEach(e=>e.value=""),updateErrorCount(),document.getElementById("denghi").value="",document.getElementById("ghichu").value="",clearAllImages()}function cancelEdit(){editingRecordId=null,editingRecordDate=null,editingRecordTime=null;const e=document.getElementById("btnSave");e.innerHTML='<i data-lucide="save" class="w-5 h-5 mr-2"></i> LƯU PHIẾU',e.classList.replace("bg-orange-600","bg-blue-600"),e.classList.replace("hover:bg-orange-700","hover:bg-blue-700"),document.getElementById("btnCancelEdit").classList.add("hidden"),resetForm(),lucide.createIcons(),showToast("Đã hủy sửa")}function saveRecord(){if(!document.getElementById("tuyen").value||!document.getElementById("vitri").value.trim())return void showToast("⚠️ Vui lòng nhập Tuyến và Số trụ!");saveLocationInfo();const e=new Date,t=document.querySelectorAll('input[name="chk_loi"]:checked'),n=document.querySelectorAll('input[name="txt_loi"]');let o=Array.from(t).map(e=>e.value);n.forEach(e=>{""!==e.value.trim()&&o.push(`${e.getAttribute("data-name")}: ${e.value.trim()}`)});const l=document.querySelector('input[name="uutien"]:checked'),c={ngay:editingRecordId?editingRecordDate:e.toLocaleDateString("vi-VN"),gio:editingRecordId?editingRecordTime:e.toLocaleTimeString("vi-VN",{hour:"2-digit",minute:"2-digit"}),tuyen:document.getElementById("tuyen").value,nhanhre:document.getElementById("nhanhre").value.trim(),tenthietbi:document.getElementById("tenthietbi").value.trim(),tentram:document.getElementById("tentram").value.trim(),vitri:document.getElementById("vitri").value.trim(),uutien:l?l.value:"Bình thường",loi_count:o.length,loi_chitiet:o.join(",\n"),denghi:document.getElementById("denghi").value.trim(),ghichu:document.getElementById("ghichu").value.trim(),hinhanh_array:[...currentImagesArray]};editingRecordId&&(c.id=editingRecordId);const a=editingRecordId?db.transaction([STORE_NAME],"readwrite").objectStore(STORE_NAME).put(c):db.transaction([STORE_NAME],"readwrite").objectStore(STORE_NAME).add(c);a.onsuccess=()=>{showToast(editingRecordId?"✅ Đã cập nhật!":"✅ Đã lưu phiếu!"),editingRecordId?(cancelEdit(),switchTab("listTab")):resetForm(),loadRecords()}}function editRecord(e){db.transaction([STORE_NAME],"readonly").objectStore(STORE_NAME).get(e).onsuccess=e=>{const t=e.target.result;if(!t)return;editingRecordId=t.id,editingRecordDate=t.ngay,editingRecordTime=t.gio,document.getElementById("tuyen").value=t.tuyen,document.getElementById("nhanhre").value=t.nhanhre||"",document.getElementById("tenthietbi").value=t.tenthietbi||"",document.getElementById("tentram").value=t.tentram||"",document.getElementById("vitri").value=t.vitri;for(let e of document.getElementsByName("uutien"))e.value===t.uutien&&(e.checked=!0);const n=t.loi_chitiet?t.loi_chitiet.split(",\n"):[];document.querySelectorAll('input[name="chk_loi"]').forEach(e=>e.checked=n.includes(e.value)),document.querySelectorAll('input[name="txt_loi"]').forEach(e=>{e.value="";const t=e.getAttribute("data-name")+": ",o=n.find(e=>e.startsWith(t));o&&(e.value=o.replace(t,""))}),updateErrorCount(),document.getElementById("denghi").value=t.denghi||"",document.getElementById("ghichu").value=t.ghichu||"",clearAllImages(),t.hinhanh_array&&t.hinhanh_array.forEach(e=>{currentImagesArray.push(e);const t="img_"+Date.now()+Math.random();document.getElementById("imageGallery").insertAdjacentHTML("beforeend",`<div class="relative shrink-0 w-20 h-20 rounded-lg overflow-hidden border border-slate-200" id="${t}"><img src="${e}" class="w-full h-full object-cover" /><button type="button" onclick="removeImage('${e}', '${t}')" class="absolute top-0.5 right-0.5 bg-red-500 text-white rounded-full p-0.5 opacity-90 hover:opacity-100"><i data-lucide="x" class="w-3 h-3"></i></button></div>`)});const o=document.getElementById("btnSave");o.innerHTML='<i data-lucide="edit" class="w-5 h-5 mr-2"></i> CẬP NHẬT',o.classList.replace("bg-blue-600","bg-orange-600"),o.classList.replace("hover:bg-blue-700","hover:bg-orange-700"),document.getElementById("btnCancelEdit").classList.remove("hidden"),switchTab("formTab"),showToast("Đang sửa phiếu...")}}function loadRecords(){if(!db)return;db.transaction([STORE_NAME],"readonly").objectStore(STORE_NAME).getAll().onsuccess=e=>{const t=e.target.result;document.getElementById("tabCount").textContent=t.length,document.getElementById("footerCount").textContent=t.length;const n=document.getElementById("recordsList");if(n.innerHTML="",0===t.length)return n.innerHTML='<div class="text-center p-8 text-slate-400 mt-10"><i data-lucide="clipboard-list" class="w-12 h-12 mb-2 mx-auto opacity-50"></i><p>Chưa có dữ liệu.</p></div>',void lucide.createIcons();t.reverse().forEach((e,o)=>{const l="Khẩn cấp"===e.uutien?"text-red-600 bg-red-100 border-red-200":"Cảnh báo"===e.uutien?"text-yellow-600 bg-yellow-100 border-yellow-200":"text-green-600 bg-green-100 border-green-200",c=e.hinhanh_array?e.hinhanh_array.length:0;n.insertAdjacentHTML("beforeend",`<div class="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden relative"><button onclick="editRecord(${e.id})" class="absolute top-2 right-10 p-1 text-slate-400 hover:text-blue-500 z-10"><i data-lucide="edit-3" class="w-5 h-5"></i></button><button onclick="deleteRecord(${e.id})" class="absolute top-2 right-2 p-1 text-slate-300 hover:text-red-500 z-10"><i data-lucide="x" class="w-5 h-5"></i></button><div class="p-3 pb-2 flex space-x-3"><div class="bg-slate-100 text-slate-500 font-bold w-8 h-8 rounded-full flex items-center justify-center shrink-0 border border-slate-200">${t.length-o}</div><div><h3 class="font-bold text-lg text-slate-800 leading-none mb-1">${e.vitri} <span class="text-xs font-normal text-slate-500 ml-1">(${e.tuyen}${e.nhanhre?" - "+e.nhanhre:""})</span></h3><div class="flex items-center gap-2 mt-2"><span class="text-[10px] font-bold px-2 py-0.5 rounded border ${l}">${e.uutien.toUpperCase()}</span>${e.loi_count>0?`<span class="text-[10px] font-bold px-2 py-0.5 rounded border text-red-600 bg-red-50 border-red-200">LỖI: ${e.loi_count}</span>`:""}${c>0?`<span class="text-[10px] font-bold px-2 py-0.5 rounded border text-blue-600 bg-blue-50 border-blue-200"><i data-lucide="image" class="w-3 h-3 inline mr-1"></i>${c} ẢNH</span>`:""}</div></div></div></div>`)}),lucide.createIcons()}}function deleteRecord(e){confirm("Xóa phiếu này?")&&(db.transaction([STORE_NAME],"readwrite").objectStore(STORE_NAME).delete(e).onsuccess=()=>loadRecords())}function clearAllData(){confirm("Xóa TOÀN BỘ lịch sử?")&&(db.transaction([STORE_NAME],"readwrite").objectStore(STORE_NAME).clear().onsuccess=()=>loadRecords())}async function exportToExcelJS(){if(!db)return;const records=await new Promise(e=>{db.transaction([STORE_NAME],"readonly").objectStore(STORE_NAME).getAll().onsuccess=t=>e(t.target.result)});if(0===records.length)return void showToast("Không có dữ liệu!");toggleLoading(!0,"Đang xử lý xuất Excel (Dán ảnh)...");setTimeout(async()=>{try{const wb=new ExcelJS.Workbook,ws=wb.addWorksheet("Bao Cao");ws.columns=[{header:"STT",key:"stt",width:5},{header:"Ngày",key:"ngay",width:12},{header:"Giờ",key:"gio",width:10},{header:"Tuyến dây",key:"tuyen",width:20},{header:"Nhánh rẽ",key:"nhanhre",width:15},{header:"Tên thiết bị",key:"tenthietbi",width:15},{header:"Tên trạm",key:"tentram",width:15},{header:"Số trụ",key:"vitri",width:10},{header:"Ưu tiên",key:"uutien",width:12},{header:"SL Lỗi",key:"loi_count",width:8},{header:"Chi tiết lỗi",key:"loi_chitiet",width:30},{header:"Đề nghị",key:"denghi",width:25},{header:"Ghi chú",key:"ghichu",width:20},{header:"Ảnh 1",key:"anh1",width:25},{header:"Ảnh 2",key:"anh2",width:25},{header:"Ảnh 3",key:"anh3",width:25}];ws.getRow(1).font={bold:!0,color:{argb:"FFFFFFFF"}};ws.getRow(1).fill={type:"pattern",pattern:"solid",fgColor:{argb:"FF1E40AF"}};records.forEach((rec,idx)=>{const row=ws.addRow({stt:idx+1,ngay:rec.ngay,gio:rec.gio,tuyen:rec.tuyen,nhanhre:rec.nhanhre,tenthietbi:rec.tenthietbi,tentram:rec.tentram,vitri:rec.vitri,uutien:rec.uutien,loi_count:rec.loi_count,loi_chitiet:rec.loi_chitiet,denghi:rec.denghi,ghichu:rec.ghichu});if(rec.hinhanh_array&&rec.hinhanh_array.length>0){row.height=100;const maxImg=Math.min(rec.hinhanh_array.length,3);for(let i=0;i<maxImg;i++){const imgId=wb.addImage({base64:rec.hinhanh_array[i].split(",")[1],extension:"jpeg"});ws.addImage(imgId,{tl:{col:12+i,row:row.number-1},ext:{width:120,height:120},editAs:"oneCell"})}}row.alignment={vertical:"middle",wrapText:!0}});const buffer=await wb.xlsx.writeBuffer(),now=new Date,timeStr=`${now.getFullYear()}${("0"+(now.getMonth()+1)).slice(-2)}${("0"+now.getDate()).slice(-2)}_${("0"+now.getHours()).slice(-2)}${("0"+now.getMinutes()).slice(-2)}`;saveAs(new Blob([buffer]),`BaoCao_KTLD_${timeStr}.xlsx`);showToast("Đã xuất Excel!")}catch(err){showToast("Lỗi tạo Excel!")}finally{toggleLoading(!1)}},300)}
     </script>
 </body>
 </html>
